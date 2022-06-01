@@ -55,3 +55,5 @@ Extracting Info the https://www.themoviedb.org using APIs, and mapping & visuali
 - TMDB - https://www.themoviedb.org/?language=en
 - IMDB - https://www.imdb.com/?ref_=nv_home
 - IMSDB - https://imsdb.com/
+
+התוצר המוצג הינו למידה רחוקה, מכיוון שהמידע הנגזר מתכנית העבודה יוצג בצורה ויזיאולית, בעזרת מפת אינדקטורים של ארה"ב.
