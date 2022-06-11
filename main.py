@@ -1,10 +1,19 @@
+import os.path
 import urllib.request
 import json
-from urllib.error import HTTPError
+# import pdfplumber
+
 api_key = '5f0c4de627a9354bdfcac23fbaacc3d2'
 
 
-def get_url_data(url):
+def dataset_to_list(path_to_dataset):
+    with open(path_to_dataset,"r+") as file:
+        return json.load(file)
+
+
+
+def get_actors(person_id):
+    url = f'https://api.themoviedb.org/3/person/{person_id}?api_key={api_key}&language=en-US'
     request = urllib.request.Request(url)
     result = urllib.request.urlopen(request)
     result_text = result.read()
@@ -55,6 +64,37 @@ def get_actors(max_id):
     return ret_list
 
 
+def extract_word_count(name_of_char, path_to_script):
+    lines = []
+    set_of_names = set()
+    with open(path_to_script, "r+") as script_file:
+        lines = script_file.readlines()
+        for line in lines:
+            set_of_names.add(line[:line.find("=")])
+        print("yo")
+
+def calc_popularity(mapping):
+    path_to_scripts = r'/Users/iBenatar/PycharmProjects/HScProject/scripts/parsed'
+    path_to_dialogues = os.path.join(path_to_scripts,'dialogue')
+    if not os.path.isdir(path_to_dialogues):
+        print("Could not find path to dialogue (scripts) dir.")
+        exit(1)
+    suffix = "_dialogue.txt"
+    for actor in mapping:
+        counter_found = 0;
+        counter_not_found = 0
+        for movie in actor['movie_info']:
+            path_to_movie = os.path.join(path_to_dialogues,movie['title'].replace(" ","-").replace(":","")) + suffix
+            if os.path.isfile(path_to_movie):
+                # print(path_to_movie)
+                counter_found+=1
+                word_count = extract_word_count(movie['character'],path_to_movie)
+            else:
+                counter_not_found+=1
+                # print(f"Couldn't find {movie['title']} in dialogue script folder")
+        print(f"TOTAL SCRIPTS FOR {actor['name']}: FOUND - {counter_found}, NOT FOUND - {counter_not_found}")
+
+
 if __name__ == '__main__':
     #get_actors(6193)
     # popular_actors = get_popular(3)
@@ -63,3 +103,12 @@ if __name__ == '__main__':
     with open("./dataset.json", "w") as f:
         json_obj = json.dumps(actors, indent=4)
         f.write(json_obj)
+    # popular_actors = get_popular(2)
+    # mapping = get_birth_place(popular_actors)
+    # test = [{'name': 'Brad Pitt', 'id': 287,'place_of_birth': 'Shawnee, Oklahoma, USA',
+    #         'movie_info':[{'title': 'Troy', 'character':'Achilles','rating': 7.1, 'vote_count':8514},
+    #                       {'title': '12 Years a Slave', 'character':'Samuel Bass','rating': 8.0, 'vote_count':9705},
+    #                       {'title': 'Fight Club','character':'Tyler Durden','rating': 8.4, 'vote_count':24204}]}]
+    test = dataset_to_list(r'/Users/iBenatar/PycharmProjects/HScProject/dataset.json')
+    pop_mapping = calc_popularity(test)
+    print("yo")
