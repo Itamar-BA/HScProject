@@ -1,7 +1,0 @@
-'T=>POLICEMAN Freeze. Get those two. Hands against the car. Come on, spread out. Spread out. Just for one minute.
-@1/4S=>KIMBERLEY You look it. Excuse me.
--I\=>MONTANA Cheat. KIMBERLEY Or get a new pair of skis. Hi yer, Killer. You know you can't do much on a tenth of a second.
-BILL JOHNSON=>UNITED STATES
-X^=>GIRL Tell me, Bill, what was going through your mind? BILL Winning. Right coach?
-,I-=>BILL Looks like we might have a little trouble getting home, boys.
-5.JM=>MONTANA 'Night Coach.
