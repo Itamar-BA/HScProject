@@ -155,4 +155,4 @@ if __name__ == '__main__':
     test = dataset_to_list(r'dataset.json')
     scripts_to_wc()
     pop_mapping = calc_popularity(test)
-    print("DEBUG")
+    print("DEBUG - Done")
