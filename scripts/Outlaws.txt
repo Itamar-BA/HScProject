@@ -1,0 +1,15 @@
+VOICE=>Open the door --
+SAYID=>With your tarp.
+JACK=>All except one.
+SAWYER=>SON OF A BITCH --
+SAWYER=>Carte blanche...
+KATE=>Suit yourself.
+KATE=>Is that a “no?”
+SAWYER=>It peed on my damn shirt!
+HURLEY=>Can I ask you a question?
+HURLEY=>Well -- nothing.
+SAWYER=>We’re out here to kill it.
+SHEPHARD=>You close with your father?
+SHEPHARD=>Good luck, Sawyer.
+SAYID=>More than that.
+SAWYER=>I got a letter for you...

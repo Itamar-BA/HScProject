@@ -1,0 +1,16 @@
+OLDER SOLDIER=>Halt in the name of the Persian Army! What is your business?
+DASTAN=>I’ve never tried.
+TUS=>To the bridge!
+GARSIV=>Shoot the horse!
+TAMINA=>Dastan, look out!
+DASTAN=>God will provide.
+DASTAN=>Wait for me here.
+DASTAN=>Two out of three?
+DASTAN=>Where is it now?
+DASTAN=>It was Nizam who tricked us into invading your kingdom with false documents…
+OFF HIS REACTION=>CUT TO:
+GARSIV=>You clumsy fool!
+TAMINA=>It’s collapsing!
+DASTAN=>Tamina… Tamina…
+DASTAN=>Tus! Call off the attack!
+TUS=>Hold! HOLD!!

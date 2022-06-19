@@ -1,0 +1,8 @@
+COLLEAGUE=>Les Américains nous abandonnent. Ils sont déjà tous partis, ambassadeur, attaché militaire…
+KHMER ROUGE SOLDIER ROADSIDE=>Tu travailles pour le gouvernment?
+KHMER ROUGE SOLDIER ROADSIDE.=>You work for the government?
+SOMEONE IN THE CROWD=>Capitalists should be shot and killed.
+ALL=>Yes, comrade.
+KHMER ROUGE WITH RIFLE=>We need your help to repair the bridge near Prey Svay. Come with us Comrade.
+ALL=>Chevo! Chevo!
+ALL=>Cheyo! Cheyo!
