@@ -7,6 +7,8 @@ from urllib.error import HTTPError
 api_key = '5f0c4de627a9354bdfcac23fbaacc3d2'
 scripts_used = set()
 scripts_total_wc = {}
+avg_word_count = 0.0
+DEBUG = True
 
 
 def dataset_to_list(path_to_dataset):
@@ -32,7 +34,7 @@ def get_movie_char(actor_id):
         data = get_url_data(url)
     except HTTPError as err:
         if err.code != 200:
-            print(f"{err} for movie_char of id {curr_id}, skipping...")
+            print(f"{err} for movie_char of id {actor_id}, skipping...")
             return []
 
     ret_list = []
@@ -84,35 +86,55 @@ def write_json(new_data, filename='dataset.json'):
         # convert back to json.
         json.dump(file_data, file, indent=4)
 
-def scripts_to_wc():
-    global scripts_total_wc
-    path_to_scripts = r'scripts/parsed'
+def process_scripts():
+    global scripts_total_wc,avg_word_count
+    set_of_names = set()
+    num_of_movies = 0
+    path_to_scripts = os.path.join("scripts", "parsed")
+    # path_to_scripts = r'scripts/parsed'
     path_to_dialogues = os.path.join(path_to_scripts,'dialogue')
     if not os.path.isdir(path_to_dialogues):
         print("Could not find path to dialogue (scripts) dir.")
         exit(1)
     suffix = "_dialogue.txt"
     for file in os.listdir(path_to_dialogues):
-        path_to_file = os.path.join(path_to_dialogues,file)
+        path_to_file = os.path.join(path_to_dialogues, file)
         if os.path.isfile(path_to_file) and file.endswith(suffix):
-            with open(path_to_file, "r+") as script_file:
-                word_count = 0
+            with open(path_to_file, "r+", encoding='utf-8', errors='ignore') as script_file:
+                total_wc = 0
+                num_of_actors = 0
+                movie_avg = 0
+                actor_wc_dict = {}
+                num_of_movies += 1
                 lines = script_file.readlines()
                 for line in lines:
                     sentence_start = line.find(">")
+                    actor_name = line[:line.find("=")]
                     if sentence_start != -1:
-                        word_count += len(line[:sentence_start].replace("\n", ""))
-                    else:
-                        print("DEBUG - COULDN'T FIND '>' IN LINE 2")
-        if word_count != 0:
-            scripts_total_wc[file[:file.find(suffix)].lower()] = word_count
+                        sentence_to_add = line[sentence_start + 1:].replace("\n", "")
+                        actor_sentence = sentence_to_add.split(" ")
+                        if len(actor_sentence) > 0:
+                            actor_wc_dict[actor_name] = actor_wc_dict.get(actor_name, 0) + len(actor_sentence)
+                            total_wc += len(actor_sentence)
+
+                for name in actor_wc_dict:
+                    num_of_actors += 1
+                    movie_avg += actor_wc_dict[name]
+                if total_wc != 0:
+                    movie_avg = movie_avg * 1000 / (total_wc * num_of_actors)
+                    avg_word_count = (avg_word_count + movie_avg) / num_of_movies
+                    scripts_total_wc[file[:file.find(suffix)].lower()] = total_wc
+    if DEBUG:
+        print(f"AVG WORD COUNT: {avg_word_count}")
+
 
 def extract_word_count(name_of_char, path_to_script, script_name):
+    global avg_word_count,scripts_total_wc
     dict_to_lines = {}
     word_count = 0
     name_to_list = name_of_char.split(" ")
     set_of_names = set()
-    with open(path_to_script, "r+") as script_file:
+    with open(path_to_script, "r+", encoding='utf-8', errors='ignore') as script_file:
         lines = script_file.readlines()
         for line in lines:
             line_name = line[:line.find("=")]
@@ -121,20 +143,22 @@ def extract_word_count(name_of_char, path_to_script, script_name):
                 if sub_name.lower() in line_name.lower():
                     sentence_start = line.find(">")
                     if sentence_start != -1:
-                        word_count += len(line[:sentence_start].replace("\n", ""))
+                        sentence_to_add = line[sentence_start+1:].replace("\n","")
+                        actor_sentence = sentence_to_add.split(" ")
+                        word_count += len(actor_sentence)
                         break
-                    else:
+                    elif DEBUG:
                         print("DEBUG - COULDN'T FIND '>' IN LINE 2")
     # print(f"COUNT WORD = {word_count}")
-    global scripts_total_wc
-    if script_name.lower() in scripts_total_wc:
+    if script_name.lower() in scripts_total_wc and word_count > 0:
         return word_count / scripts_total_wc[script_name.lower()]
-    return 0.0
+    return avg_word_count
 
 
 
 def calc_popularity(mapping):
-    path_to_scripts = r'scripts/parsed'
+    # path_to_scripts = r'scripts/parsed'
+    path_to_scripts = os.path.join("scripts", "parsed")
     path_to_dialogues = os.path.join(path_to_scripts,'dialogue')
     if not os.path.isdir(path_to_dialogues):
         print("Could not find path to dialogue (scripts) dir.")
@@ -152,15 +176,15 @@ def calc_popularity(mapping):
                 scripts_used.add(movie_fixed_name)
                 # print(path_to_movie)
                 counter_found+=1
-                if movie['character'] == "":
+                if movie['character'] == "" and DEBUG:
                     print(f"DEBUG - Character name EMPTY for {actor['name']} in {movie_fixed_name}")
                 else:
                     word_count = extract_word_count(movie['character'],path_to_movie, movie_fixed_name)
-                    print(f"DEBUG - WORD COUNT: {word_count}")
-            else:
+                    if DEBUG:
+                        print(f"DEBUG - WORD COUNT: {word_count}")
+            elif DEBUG:
                 # print(f"DEBUG - Couldn't find movie script: {movie['title']}")
                 pass
-                # print(f"Couldn't find {movie['title']} in dialogue script folder")
         # print(f"TOTAL SCRIPTS FOR {actor['name']}: FOUND - {counter_found}, NOT FOUND - {counter_not_found}")
 
 
@@ -172,12 +196,13 @@ def create_empty_json():
 
 
 if __name__ == '__main__':
-    create_empty_json()
-    create_database(40000)
+    # create_empty_json()
+    # create_database(40000)
 
     # popular_actors = get_popular(2)
     # mapping = get_birth_place(popular_actors)
     test = dataset_to_list(r'dataset.json')
-    scripts_to_wc()
+    process_scripts()
     pop_mapping = calc_popularity(test)
-    print("DEBUG - Done")
+    if DEBUG:
+        print("DEBUG - Done")
