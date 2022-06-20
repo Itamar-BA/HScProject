@@ -3,6 +3,7 @@ import urllib.request
 import json
 from urllib.error import HTTPError
 import csv
+import urllib.parse
 
 api_key = '5f0c4de627a9354bdfcac23fbaacc3d2'
 scripts_used = set()
@@ -53,6 +54,13 @@ def get_movie_char(actor_id):
                          "vote_count": curr_movie['vote_count']})
 
     return ret_list
+
+def address_to_coords(address):
+    url = 'https://nominatim.openstreetmap.org/search/' + urllib.parse.quote(address) +'?format=json'
+    data = get_url_data(url)
+    longitude = data[0]["lon"]
+    latitude = data[0]["lat"]
+    return longitude, latitude
 
 
 def create_database(max_id):
@@ -203,9 +211,13 @@ def calc_popularity(mapping):
 
         if DEBUG2:
             print(f"Actor {actor['name']} Popularity: {actor_popularity}")
+        birthplace = actor['place_of_birth'].replace(",","")
+        lon, lat = address_to_coords(actor['place_of_birth'].replace(",",""))
         popular_list.append({"name":actor['name'],
                              "profile_url": f"https://www.themoviedb.org/person/{actor['id']}",
-                             "place_of_birth": actor['place_of_birth'].replace(",",""),
+                             "place_of_birth": birthplace,
+                             "longitude": lon,
+                             "latitude": lat,
                              "popularity": actor_popularity})
         # actor['popularity'] = actor_popularity
     return popular_list
