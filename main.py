@@ -2,7 +2,7 @@ import os.path
 import urllib.request
 import json
 from urllib.error import HTTPError
-# import pdfplumber
+import csv
 
 api_key = '5f0c4de627a9354bdfcac23fbaacc3d2'
 scripts_used = set()
@@ -10,6 +10,12 @@ scripts_total_wc = {}
 avg_word_count = 0.0
 DEBUG1 = False
 DEBUG2 = True
+
+
+def create_empty_json():
+    f = open("./dataset.json", "w")
+    json.dump([], f, indent=4)
+    f.close()
 
 
 def dataset_to_list(path_to_dataset):
@@ -197,13 +203,16 @@ def calc_popularity(mapping):
 
         if DEBUG2:
             print(f"Actor {actor['name']} Popularity: {actor_popularity}")
-        actor['popularity'] = actor_popularity
+        popular_list.append({"name":actor['name'],
+                             "profile_url": f"https://www.themoviedb.org/person/{actor['id']}",
+                             "place_of_birth": actor['place_of_birth'].replace(",",""),
+                             "popularity": actor_popularity})
+        # actor['popularity'] = actor_popularity
+    return popular_list
 
 
-def create_empty_json():
-    f = open("./dataset.json", "w")
-    json.dump([], f, indent=4)
-    f.close()
+def export_to_csv(list_of_actors):
+    pass
 
 
 if __name__ == '__main__':
@@ -214,6 +223,7 @@ if __name__ == '__main__':
     # mapping = get_birth_place(popular_actors)
     test = dataset_to_list(r'dataset.json')
     process_scripts()
-    calc_popularity(test)
+    popularity_list = calc_popularity(test)
+    export_to_csv(popularity_list)
     if DEBUG1:
         print("DEBUG - Done")
