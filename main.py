@@ -89,7 +89,6 @@ def write_json(new_data, filename='dataset.json'):
 
 def process_scripts():
     global scripts_total_wc,avg_word_count
-    set_of_names = set()
     num_of_movies = 0
     path_to_scripts = os.path.join("scripts", "parsed")
     # path_to_scripts = r'scripts/parsed'
@@ -103,6 +102,7 @@ def process_scripts():
         if os.path.isfile(path_to_file) and file.endswith(suffix):
             with open(path_to_file, "r+", encoding='utf-8', errors='ignore') as script_file:
                 total_wc = 0
+                set_of_names = set()
                 num_of_actors = 0
                 movie_avg = 0
                 actor_wc_dict = {}
@@ -115,14 +115,16 @@ def process_scripts():
                         sentence_to_add = line[sentence_start + 1:].replace("\n", "")
                         actor_sentence = sentence_to_add.split(" ")
                         if len(actor_sentence) > 0:
-                            actor_wc_dict[actor_name] = actor_wc_dict.get(actor_name, 0) + len(actor_sentence)
+                            set_of_names.add(actor_name)
+                            # actor_wc_dict[actor_name] = actor_wc_dict.get(actor_name, 0) + len(actor_sentence)
                             total_wc += len(actor_sentence)
 
-                for name in actor_wc_dict:
-                    num_of_actors += 1
-                    movie_avg += actor_wc_dict[name]
+                # for name in actor_wc_dict:
+                #     num_of_actors += 1
+                #     movie_avg += actor_wc_dict[name]
                 if total_wc != 0:
-                    movie_avg = movie_avg * 1000 / (total_wc * num_of_actors)
+                    # movie_avg = movie_avg * 1000 / (total_wc * num_of_actors)
+                    movie_avg = 1000 / len(set_of_names)
                     avg_word_count = (avg_word_count + movie_avg) / num_of_movies
                     scripts_total_wc[file[:file.find(suffix)].lower()] = total_wc
     if DEBUG1:
@@ -184,7 +186,7 @@ def calc_popularity(mapping):
                 # else:
                 word_count = extract_word_count(movie['character'],path_to_movie, movie_fixed_name)
                 if DEBUG1:
-                    print(f"DEBUG - WORD COUNT: {word_count}")
+                    print(f"DEBUG - WORD COUNT FOUND: {word_count}")
             else:
                 word_count = avg_word_count
                 if DEBUG1:
