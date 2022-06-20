@@ -8,7 +8,8 @@ api_key = '5f0c4de627a9354bdfcac23fbaacc3d2'
 scripts_used = set()
 scripts_total_wc = {}
 avg_word_count = 0.0
-DEBUG = True
+DEBUG1 = False
+DEBUG2 = True
 
 
 def dataset_to_list(path_to_dataset):
@@ -124,7 +125,7 @@ def process_scripts():
                     movie_avg = movie_avg * 1000 / (total_wc * num_of_actors)
                     avg_word_count = (avg_word_count + movie_avg) / num_of_movies
                     scripts_total_wc[file[:file.find(suffix)].lower()] = total_wc
-    if DEBUG:
+    if DEBUG1:
         print(f"AVG WORD COUNT: {avg_word_count}")
 
 
@@ -147,7 +148,7 @@ def extract_word_count(name_of_char, path_to_script, script_name):
                         actor_sentence = sentence_to_add.split(" ")
                         word_count += len(actor_sentence)
                         break
-                    elif DEBUG:
+                    elif DEBUG1:
                         print("DEBUG - COULDN'T FIND '>' IN LINE 2")
     # print(f"COUNT WORD = {word_count}")
     if script_name.lower() in scripts_total_wc and word_count > 0:
@@ -158,6 +159,7 @@ def extract_word_count(name_of_char, path_to_script, script_name):
 
 def calc_popularity(mapping):
     # path_to_scripts = r'scripts/parsed'
+    popular_list = []
     path_to_scripts = os.path.join("scripts", "parsed")
     path_to_dialogues = os.path.join(path_to_scripts,'dialogue')
     if not os.path.isdir(path_to_dialogues):
@@ -165,34 +167,40 @@ def calc_popularity(mapping):
         exit(1)
     suffix = "_dialogue.txt"
     for actor in mapping:
+        actor_popularity = 0.0
         counter_found = 0
         counter_not_found = 0
         for movie in actor['movie_info']:
             movie_fixed_name = movie['title'].replace(" ", "-").replace(":", "")
             path_to_movie = os.path.join(path_to_dialogues, movie_fixed_name + suffix)
-            if os.path.isfile(path_to_movie):
+            if os.path.isfile(path_to_movie) and movie['character'] != "":
 
                 global scripts_used
                 scripts_used.add(movie_fixed_name)
                 # print(path_to_movie)
                 counter_found+=1
-                if movie['character'] == "" and DEBUG:
-                    print(f"DEBUG - Character name EMPTY for {actor['name']} in {movie_fixed_name}")
-                else:
-                    word_count = extract_word_count(movie['character'],path_to_movie, movie_fixed_name)
-                    if DEBUG:
-                        print(f"DEBUG - WORD COUNT: {word_count}")
-            elif DEBUG:
-                # print(f"DEBUG - Couldn't find movie script: {movie['title']}")
-                pass
-        # print(f"TOTAL SCRIPTS FOR {actor['name']}: FOUND - {counter_found}, NOT FOUND - {counter_not_found}")
+                # if movie['character'] == "" and DEBUG:
+                #     print(f"DEBUG - Character name EMPTY for {actor['name']} in {movie_fixed_name}")
+                # else:
+                word_count = extract_word_count(movie['character'],path_to_movie, movie_fixed_name)
+                if DEBUG1:
+                    print(f"DEBUG - WORD COUNT: {word_count}")
+            else:
+                word_count = avg_word_count
+                if DEBUG1:
+                    # print(f"DEBUG - Couldn't find movie script: {movie['title']}")
+                    pass
+            actor_popularity += word_count * (movie['rating'] / 10.0) * movie['vote_count']
+
+        if DEBUG2:
+            print(f"Actor {actor['name']} Popularity: {actor_popularity}")
+        actor['popularity'] = actor_popularity
 
 
 def create_empty_json():
     f = open("./dataset.json", "w")
     json.dump([], f, indent=4)
     f.close()
-
 
 
 if __name__ == '__main__':
@@ -203,6 +211,6 @@ if __name__ == '__main__':
     # mapping = get_birth_place(popular_actors)
     test = dataset_to_list(r'dataset.json')
     process_scripts()
-    pop_mapping = calc_popularity(test)
-    if DEBUG:
+    calc_popularity(test)
+    if DEBUG1:
         print("DEBUG - Done")
