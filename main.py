@@ -219,12 +219,16 @@ def calc_popularity(mapping):
                              "longitude": lon,
                              "latitude": lat,
                              "popularity": actor_popularity})
-        # actor['popularity'] = actor_popularity
+        actor['popularity'] = actor_popularity
     return popular_list
 
 
 def export_to_csv(list_of_actors):
-    pass
+    actor_info = ["name","profile_url","place_of_birth","longitude","latitude","popularity"]
+    with open("results.csv","w+") as csvfile:
+        writer = csv.DictWriter(csvfile, fieldnames=actor_info)
+        writer.writeheader()
+        writer.writerows(list_of_actors)
 
 
 if __name__ == '__main__':
