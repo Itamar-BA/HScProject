@@ -22,7 +22,7 @@ def create_empty_json():
 def dataset_to_list(path_to_dataset):
     # dir = os.path.dirname(__file__)
     # filename = os.path.join(dir, path_to_dataset)
-    with open(path_to_dataset ,"r+") as file:
+    with open(path_to_dataset, "r+") as file:
         return json.load(file)
 
 
@@ -55,18 +55,23 @@ def get_movie_char(actor_id):
 
     return ret_list
 
+
 def address_to_coords(address):
-    url = 'https://nominatim.openstreetmap.org/search/' + urllib.parse.quote(address) +'?format=json'
+    url = 'https://nominatim.openstreetmap.org/search/' + urllib.parse.quote(address) + '?format=json'
     data = get_url_data(url)
-    longitude = data[0]["lon"]
-    latitude = data[0]["lat"]
+    longitude = latitude = 0.0
+    try:
+        longitude = data[0]["lon"]
+        latitude = data[0]["lat"]
+    except:
+        print(f"Error with url: {url}")
     return longitude, latitude
 
 
-def create_database(max_id):
+def create_database(max_id,start=1):
     data = None
 
-    for curr_id in range(1, max_id):
+    for curr_id in range(start, max_id):
         url = f"https://api.themoviedb.org/3/person/{curr_id}?api_key=5f0c4de627a9354bdfcac23fbaacc3d2&language=en-US"
         try:
             data = get_url_data(url)
@@ -84,9 +89,9 @@ def create_database(max_id):
         if is_actor and is_american:
             movie_info = get_movie_char(curr_id)
             actor = {"name": data['name'],
-                             "id": curr_id,
-                             "place_of_birth": birth_place,
-                             "movie_info": movie_info}
+                     "id": curr_id,
+                     "place_of_birth": birth_place,
+                     "movie_info": movie_info}
             # new_data = json.stringify(actor)
             write_json(actor)
 
@@ -102,12 +107,13 @@ def write_json(new_data, filename='dataset.json'):
         # convert back to json.
         json.dump(file_data, file, indent=4)
 
+
 def process_scripts():
-    global scripts_total_wc,avg_word_count
+    global scripts_total_wc, avg_word_count
     num_of_movies = 0
     path_to_scripts = os.path.join("scripts", "parsed")
     # path_to_scripts = r'scripts/parsed'
-    path_to_dialogues = os.path.join(path_to_scripts,'dialogue')
+    path_to_dialogues = os.path.join(path_to_scripts, 'dialogue')
     if not os.path.isdir(path_to_dialogues):
         print("Could not find path to dialogue (scripts) dir.")
         exit(1)
@@ -147,7 +153,7 @@ def process_scripts():
 
 
 def extract_word_count(name_of_char, path_to_script, script_name):
-    global avg_word_count,scripts_total_wc
+    global avg_word_count, scripts_total_wc
     dict_to_lines = {}
     word_count = 0
     name_to_list = name_of_char.split(" ")
@@ -156,12 +162,12 @@ def extract_word_count(name_of_char, path_to_script, script_name):
         lines = script_file.readlines()
         for line in lines:
             line_name = line[:line.find("=")]
-            dict_to_lines[line_name] = dict_to_lines.get(line_name,0) + 1
+            dict_to_lines[line_name] = dict_to_lines.get(line_name, 0) + 1
             for sub_name in name_to_list:
                 if sub_name.lower() in line_name.lower():
                     sentence_start = line.find(">")
                     if sentence_start != -1:
-                        sentence_to_add = line[sentence_start+1:].replace("\n","")
+                        sentence_to_add = line[sentence_start + 1:].replace("\n", "")
                         actor_sentence = sentence_to_add.split(" ")
                         word_count += len(actor_sentence)
                         break
@@ -173,12 +179,11 @@ def extract_word_count(name_of_char, path_to_script, script_name):
     return avg_word_count
 
 
-
 def calc_popularity(mapping):
     # path_to_scripts = r'scripts/parsed'
     popular_list = []
     path_to_scripts = os.path.join("scripts", "parsed")
-    path_to_dialogues = os.path.join(path_to_scripts,'dialogue')
+    path_to_dialogues = os.path.join(path_to_scripts, 'dialogue')
     if not os.path.isdir(path_to_dialogues):
         print("Could not find path to dialogue (scripts) dir.")
         exit(1)
@@ -195,11 +200,11 @@ def calc_popularity(mapping):
                 global scripts_used
                 scripts_used.add(movie_fixed_name)
                 # print(path_to_movie)
-                counter_found+=1
+                counter_found += 1
                 # if movie['character'] == "" and DEBUG:
                 #     print(f"DEBUG - Character name EMPTY for {actor['name']} in {movie_fixed_name}")
                 # else:
-                word_count = extract_word_count(movie['character'],path_to_movie, movie_fixed_name)
+                word_count = extract_word_count(movie['character'], path_to_movie, movie_fixed_name)
                 if DEBUG1:
                     print(f"DEBUG - WORD COUNT FOUND: {word_count}")
             else:
@@ -211,9 +216,9 @@ def calc_popularity(mapping):
 
         if DEBUG2:
             print(f"Actor {actor['name']} Popularity: {actor_popularity}")
-        birthplace = actor['place_of_birth'].replace(",","")
-        lon, lat = address_to_coords(actor['place_of_birth'].replace(",",""))
-        popular_list.append({"name":actor['name'],
+        birthplace = actor['place_of_birth'].replace(",", "")
+        lon, lat = address_to_coords(actor['place_of_birth'].replace(",", ""))
+        popular_list.append({"name": actor['name'],
                              "profile_url": f"https://www.themoviedb.org/person/{actor['id']}",
                              "place_of_birth": birthplace,
                              "longitude": lon,
@@ -224,8 +229,8 @@ def calc_popularity(mapping):
 
 
 def export_to_csv(list_of_actors):
-    actor_info = ["name","profile_url","place_of_birth","longitude","latitude","popularity"]
-    with open("results.csv","w+") as csvfile:
+    actor_info = ["name", "profile_url", "place_of_birth", "longitude", "latitude", "popularity"]
+    with open("results.csv", "w+", newline="") as csvfile:
         writer = csv.DictWriter(csvfile, fieldnames=actor_info)
         writer.writeheader()
         writer.writerows(list_of_actors)
