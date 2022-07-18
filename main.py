@@ -17,6 +17,7 @@ def create_empty_json():
     f = open("./dataset.json", "w")
     json.dump([], f, indent=4)
     f.close()
+    return "dataset.json"
 
 
 def dataset_to_list(path_to_dataset):
@@ -234,17 +235,36 @@ def export_to_csv(list_of_actors):
         writer = csv.DictWriter(csvfile, fieldnames=actor_info)
         writer.writeheader()
         writer.writerows(list_of_actors)
-
+    print("Results saved to results.csv")
 
 if __name__ == '__main__':
-    # create_empty_json()
-    # create_database(40000)
+    mode = int(input("Please Choose:\n"
+                     "1 - Create new dataset\n"
+                     "2 - Use existing dataset\n"
+                     "3 - Use existing results.csv: "))
+    while mode != 1 and mode != 2 and mode != 3:
+        mode = int(input("Please enter a valid mode [1/2/3]: "))
+    dataset_path = None
+    if mode == 1:
+        dataset_path = create_empty_json()
+        create_database(40000)
+    elif mode == 2:
+        dataset_path = str(input("Please enter dataset.json path: "))
+        while not os.path.isfile(dataset_path):
+            dataset_path = str(input("Please enter a valid dataset.json path: "))
+    elif mode == 3:
+        results_path = str(input("Please enter results.csv path: "))
+        while not os.path.isfile(dataset_path):
+            dataset_path = str(input("Please enter a valid results.csv path: "))
 
     # popular_actors = get_popular(2)
     # mapping = get_birth_place(popular_actors)
-    test = dataset_to_list(r'dataset.json')
-    process_scripts()
-    popularity_list = calc_popularity(test)
-    export_to_csv(popularity_list)
+    if mode == 1 or mode == 2:
+        test = dataset_to_list(dataset_path)
+        process_scripts()
+        popularity_list = calc_popularity(test)
+        export_to_csv(popularity_list)
+    else:
+        pass
     if DEBUG1:
         print("DEBUG - Done")
