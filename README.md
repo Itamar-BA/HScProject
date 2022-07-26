@@ -57,3 +57,4 @@ Extracting Info the https://www.themoviedb.org using APIs, and mapping & visuali
 - IMDB - https://www.imdb.com/?ref_=nv_home
 - IMSDB - https://imsdb.com/
 - What drives the market popularity of celebrities? A longitudinal analysis of consumer interest in film stars        https://www.sciencedirect.com/science/article/abs/pii/S0167811615001093?via%3Dihub
+- Map Results - https://kepler.gl/demo/map?mapUrl=https://dl.dropboxusercontent.com/s/58id9rutn3w50aw/keplergl_mvd6ign.json
